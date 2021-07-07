@@ -1,16 +1,16 @@
 import 'dart:convert';
 
+import 'package:device_info/device_info.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:thacker/functions/pagesort.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thacker/functions/slide.dart';
 import 'package:thacker/pages/dots.dart';
 import 'package:thacker/pages/login.dart';
 import 'package:thacker/pages/sliders.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:device_info/device_info.dart';
-import 'package:http/http.dart' as http;
+import 'package:thacker/util.dart';
 
 class WelcomeScreen extends StatefulWidget {
   @override
@@ -19,7 +19,6 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   bool submit = false;
-  final _globalKeyScaffold = GlobalKey<ScaffoldState>();
   int currentPage = 0;
   final PageController _pageController = PageController(initialPage: 0);
 
@@ -50,9 +49,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     String brand = androidInfo.brand;
     var jsonData = null;
-    var url =
-        'http://localhost/thacker/api/access.php?device=$brand&app=Plus&version=1.0';
-    var response = await http.get(url);
+    // var url =
+    //     'http://localhost/thacker/api/access.php?device=$brand&app=Plus&version=1.0';
+    // var response = await http.get(url);
+
+    final url = Uri(
+        scheme: httpAP,
+        host: urlAP,
+        path: path + accessAP,
+        queryParameters: {'device': brand, 'app': 'Plus', 'version': '2.0'});
+    var response = await http.get(url, headers: getAP);
 
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
@@ -72,7 +78,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         setState(() {
           submit = false;
         });
-        return _globalKeyScaffold.currentState.showSnackBar(
+        return ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: <Widget>[

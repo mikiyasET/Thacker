@@ -1,13 +1,14 @@
 import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:thacker/includes/drawer.dart';
-import 'package:thacker/pages/sms.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:thacker/pages/phone.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:thacker/pages/phone.dart';
+import 'package:thacker/pages/sms.dart';
+
+import '../util.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -34,8 +35,14 @@ class _LoginState extends State<Login> {
     var phone = _phoneController.text;
     if (phone.length > 7) {
       var id = sharedPreferences.getString('id');
-      var url = "http://localhost/thacker/api/phone.php?id=$id&phone=$phone";
-      var response = await http.get(url);
+      // var url = "http://localhost/thacker/api/phone.php?id=$id&phone=$phone";
+      // var response = await http.get(url);
+      final url = Uri(
+          scheme: httpAP,
+          host: urlAP,
+          path: path + phoneAP,
+          queryParameters: {'id': id, 'phone': phone});
+      var response = await http.get(url, headers: getAP);
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -62,7 +69,8 @@ class _LoginState extends State<Login> {
               color: Colors.white,
             );
           });
-          return _globalKeyScaffold.currentState.showSnackBar(
+
+          return ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
                 children: <Widget>[

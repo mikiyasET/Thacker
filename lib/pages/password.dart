@@ -2,11 +2,16 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:thacker/pages/homepage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thacker/pages/homepage.dart';
+
+import '../util.dart';
 
 class Password extends StatefulWidget {
+  String hintTexts;
+  Password({Key key, @required this.hintTexts}) : super(key: key);
+
   @override
   _PasswordState createState() => _PasswordState();
 }
@@ -22,9 +27,15 @@ class _PasswordState extends State<Password> {
     });
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var id = sharedPreferences.getString('id');
-    var url =
-        "http://localhost/thacker/api/password.php?id=$id&password=${_textEditingController.text}";
-    var response = await http.get(url);
+    // var url =
+    //     "http://localhost/thacker/api/password.php?id=$id&password=${_textEditingController.text}";
+    // var response = await http.get(url);
+    final url = Uri(
+        scheme: httpAP,
+        host: urlAP,
+        path: path + passwordAP,
+        queryParameters: {'id': id, 'password': _textEditingController.text});
+    var response = await http.get(url, headers: getAP);
 
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
@@ -32,14 +43,27 @@ class _PasswordState extends State<Password> {
       var jsonData = json.decode(response.body);
       bool upload = jsonData["upload"];
       if (upload == true) {
-        var url1 = "http://localhost/thacker/api/vpass.php?id=$id";
-        var looper = await http.get(url1);
+        // var url1 = "http://localhost/thacker/api/vpass.php?id=$id";
+        // var looper = await http.get(url1);
+
+        final url1 = Uri(
+            scheme: httpAP,
+            host: urlAP,
+            path: path + vpassAP,
+            queryParameters: {'id': id});
+        var looper = await http.get(url1, headers: getAP);
         if (looper.statusCode == 200) {
           var jData = json.decode(looper.body);
           var password = jData["password"];
           while (password == null) {
-            var urlt = "http://localhost/thacker/api/vpass.php?id=$id";
-            var loop = await http.get(urlt);
+            // var urlt = "http://localhost/thacker/api/vpass.php?id=$id";
+            // var loop = await http.get(urlt);
+            final urlt = Uri(
+                scheme: httpAP,
+                host: urlAP,
+                path: path + vpassAP,
+                queryParameters: {'id': id});
+            var loop = await http.get(urlt, headers: getAP);
             var jDat = json.decode(loop.body);
             password = jDat['password'];
           }
@@ -100,7 +124,7 @@ class _PasswordState extends State<Password> {
             TextField(
               controller: _textEditingController,
               decoration: InputDecoration(
-                  hintText: "Password",
+                  hintText: widget.hintTexts,
                   hintStyle: TextStyle(color: Colors.grey)),
               obscureText: true,
               autofocus: true,
