@@ -1,4 +1,4 @@
-# thacker
+# THacker
 
 This is the Thacker Android app 
 
